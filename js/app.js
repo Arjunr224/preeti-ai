@@ -1,3 +1,64 @@
+/* ================= CHAT ENGINE ================= */
+
+const ChatEngine = {
+
+    init() {
+        MemoryEngine.load();
+        GreetingModule.greetIfFirstTime();
+        ValentineEngine.checkDate();
+    },
+
+    send() {
+        const inputField = document.getElementById("userInput");
+        const message = inputField.value.trim();
+        if (!message) return;
+
+        ChatUI.addMessage(message, "user");
+        MemoryEngine.save(message, "user");
+
+        inputField.value = "";
+
+        ChatUI.showTyping();
+
+        setTimeout(() => {
+            ChatUI.removeTyping();
+            ChatEngine.respond(message.toLowerCase());
+        }, 900);
+    },
+
+    quickSend(text) {
+        document.getElementById("userInput").value = text;
+        this.send();
+    },
+
+    respond(input) {
+
+        let reply = "";
+
+        if (input.includes("happy"))
+            reply = "Yeh sunke mujhe bhi smile aa gayi ❤️ Tumhari khushi meri favorite cheez hai.";
+
+        else if (input.includes("low") || input.includes("sad"))
+            reply = "Aao yahan 🤍 Sab kuch akela handle karne ki zarurat nahi hai. Main hoon na.";
+
+        else if (input.includes("miss"))
+            reply = "Main bhi tumhe bahut miss karta hoon ❤️ Distance sirf shehron ka hota hai, dilon ka nahi.";
+
+        else if (input.includes("love"))
+            reply = "Main tumse itna pyaar karta hoon ki words bhi kam pad jaate hain 🤍";
+
+        else if (input.includes("future"))
+            reply = "Humara future already planning mode mein hai 😌 Bas execution baaki hai 💍";
+
+        else
+            reply = "Tumhara forever Arjun ispe kaam kar raha hai, full love ke saath 🤍";
+
+        ChatUI.addMessage(reply, "bot");
+        MemoryEngine.save(reply, "bot");
+    }
+};
+
+
 /* ================= MEMORY ENGINE ================= */
 
 const MemoryEngine = {
@@ -13,45 +74,28 @@ const MemoryEngine = {
         chats.forEach(chat => {
             ChatUI.addMessage(chat.text, chat.type);
         });
-    },
-
-    clear() {
-        localStorage.removeItem("preetiChat");
-        location.reload();
     }
 };
 
 
-/* ================= UI ================= */
+/* ================= GREETING ================= */
 
-const ChatUI = {
+const GreetingModule = {
 
-    addMessage(text, type) {
-        const chatBox = document.getElementById("chat-box");
+    greetIfFirstTime() {
+        let chats = JSON.parse(localStorage.getItem("preetiChat"));
 
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", type);
-        messageDiv.innerText = text;
+        if (!chats || chats.length === 0) {
+            setTimeout(() => {
+                ChatUI.addMessage("Hi Preeti 🤍", "bot");
+                MemoryEngine.save("Hi Preeti 🤍", "bot");
+            }, 500);
 
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    },
-
-    showTyping() {
-        const chatBox = document.getElementById("chat-box");
-
-        const typingDiv = document.createElement("div");
-        typingDiv.classList.add("message", "bot");
-        typingDiv.id = "typing";
-        typingDiv.innerText = "PreetiCare AI soch raha hai...";
-
-        chatBox.appendChild(typingDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    },
-
-    removeTyping() {
-        const typing = document.getElementById("typing");
-        if (typing) typing.remove();
+            setTimeout(() => {
+                ChatUI.addMessage("Aaj mood kaisa hai tumhara? 😊", "bot");
+                MemoryEngine.save("Aaj mood kaisa hai tumhara? 😊", "bot");
+            }, 1200);
+        }
     }
 };
 
@@ -61,23 +105,22 @@ const ChatUI = {
 const ValentineEngine = {
 
     checkDate() {
-
         const today = new Date();
-        const month = today.getMonth(); // Feb = 1
+        const month = today.getMonth();
         const date = today.getDate();
 
         if (month === 1) {
 
-            this.showCountdown();
+            ValentineEngine.showCountdown();
 
             const messages = {
-                7: "🌹 Happy Rose Day 🌹\nTum meri life ka sabse beautiful phool ho 🤍",
-                8: "💍 Happy Propose Day 💍\nMain tumhe har kal ke liye choose karta hoon.",
-                9: "🍫 Happy Chocolate Day 🍫\nTum chocolate se bhi zyada sweet ho ❤️",
-                10: "🧸 Happy Teddy Day 🧸\nKaash main teddy hota aur tum mujhe hug karti 🤍",
-                11: "🤍 Happy Promise Day 🤍\nMain hamesha tumhare saath rahunga.",
-                12: "🤗 Happy Hug Day 🤗\nYeh hug lifetime validity ke saath hai.",
-                14: "❤️ Happy Valentine's Day ❤️\nTum meri forever ho 🤍"
+                7: "🌹 Happy Rose Day 🌹 Tum meri life ka sabse beautiful phool ho 🤍",
+                8: "💍 Happy Propose Day 💍 Main tumhe har kal ke liye choose karta hoon.",
+                9: "🍫 Happy Chocolate Day 🍫 Tum chocolate se bhi zyada sweet ho ❤️",
+                10: "🧸 Happy Teddy Day 🧸 Kaash main teddy hota aur tum mujhe hug karti 🤍",
+                11: "🤍 Happy Promise Day 🤍 Main hamesha tumhare saath rahunga.",
+                12: "🤗 Happy Hug Day 🤗 Yeh hug lifetime validity ke saath hai.",
+                14: "❤️ Happy Valentine's Day ❤️ Tum meri forever ho 🤍"
             };
 
             if (messages[date]) {
@@ -88,8 +131,8 @@ const ValentineEngine = {
             }
 
             if (date === 14) {
-                this.secretProposal();
-                this.heartExplosion();
+                ValentineEngine.secretProposal();
+                ValentineEngine.heartExplosion();
             }
         }
     },
@@ -109,7 +152,7 @@ const ValentineEngine = {
     },
 
     secretProposal() {
-        const proposal = "Preeti 🤍\nKya tum meri forever banogi? 💍❤️";
+        const proposal = "Preeti 🤍 Kya tum meri forever banogi? 💍❤️";
         setTimeout(() => {
             ChatUI.addMessage(proposal, "bot");
             MemoryEngine.save(proposal, "bot");
@@ -130,121 +173,38 @@ const ValentineEngine = {
 };
 
 
-/* ================= CHAT ENGINE ================= */
+/* ================= UI ================= */
 
-const ChatEngine = {
+const ChatUI = {
 
-    init() {
-        MemoryEngine.load();
-        this.greetIfFirstTime();
-        ValentineEngine.checkDate();
+    addMessage(text, type) {
+        const chatBox = document.getElementById("chat-box");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", type);
+        messageDiv.innerText = text;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
     },
 
-    greetIfFirstTime() {
-        let chats = JSON.parse(localStorage.getItem("preetiChat"));
-
-        if (!chats || chats.length === 0) {
-
-            setTimeout(() => {
-                ChatUI.addMessage("Hi Preeti 🤍", "bot");
-                MemoryEngine.save("Hi Preeti 🤍", "bot");
-            }, 500);
-
-            setTimeout(() => {
-                ChatUI.addMessage("Aaj mood kaisa hai tumhara? 😊", "bot");
-                MemoryEngine.save("Aaj mood kaisa hai tumhara? 😊", "bot");
-            }, 1200);
-        }
+    showTyping() {
+        const chatBox = document.getElementById("chat-box");
+        const typingDiv = document.createElement("div");
+        typingDiv.classList.add("message", "bot");
+        typingDiv.id = "typing";
+        typingDiv.innerText = "PreetiCare AI soch raha hai...";
+        chatBox.appendChild(typingDiv);
     },
 
-    send() {
-
-        const inputField = document.getElementById("userInput");
-        const message = inputField.value.trim();
-
-        if (!message) return;
-
-        ChatUI.addMessage(message, "user");
-        MemoryEngine.save(message, "user");
-
-        inputField.value = "";
-
-        ChatUI.showTyping();
-
-        setTimeout(() => {
-            ChatUI.removeTyping();
-            this.respond(message.toLowerCase());
-        }, 900);
-    },
-
-    quickSend(text) {
-        document.getElementById("userInput").value = text;
-        this.send();
-    },
-
-    respond(input) {
-
-        let reply = "";
-
-        /* Valentine Keywords */
-
-        if (input.includes("rose day"))
-            reply = "🌹 Happy Rose Day 🌹\nTum meri life ka sabse beautiful phool ho 🤍";
-
-        else if (input.includes("propose day"))
-            reply = "💍 Happy Propose Day 💍\nMain tumhe har kal ke liye choose karta hoon.";
-
-        else if (input.includes("chocolate day"))
-            reply = "🍫 Happy Chocolate Day 🍫\nTum chocolate se bhi zyada sweet ho ❤️";
-
-        else if (input.includes("teddy day"))
-            reply = "🧸 Happy Teddy Day 🧸\nKaash main teddy hota aur tum mujhe hug karti 🤍";
-
-        else if (input.includes("promise day"))
-            reply = "🤍 Happy Promise Day 🤍\nMain hamesha tumhare saath rahunga.";
-
-        else if (input.includes("hug day"))
-            reply = "🤗 Happy Hug Day 🤗\nMain tumhe tight hug bhej raha hoon 🤍";
-
-        else if (input.includes("valentine"))
-            reply = "❤️ Happy Valentine's Day ❤️\nTum meri forever ho 🤍";
-
-        /* Mood */
-
-        else if (input.includes("happy"))
-            reply = "Yeh sunke mujhe bhi smile aa gayi ❤️";
-
-        else if (input.includes("low") || input.includes("sad"))
-            reply = "Main hoon na 🤍";
-
-        else if (input.includes("miss"))
-            reply = "Main bhi tumhe miss karta hoon ❤️";
-
-        else if (input.includes("love"))
-            reply = "Main tumse itna pyaar karta hoon ki words kam pad jaate hain 🤍";
-
-        else if (input === "reset memory") {
-            MemoryEngine.clear();
-            return;
-        }
-
-        else
-            reply = "Tumhara forever Arjun ispe kaam kar raha hai, full love ke saath 🤍";
-
-        ChatUI.addMessage(reply, "bot");
-        MemoryEngine.save(reply, "bot");
+    removeTyping() {
+        const typing = document.getElementById("typing");
+        if (typing) typing.remove();
     }
 };
 
-
-/* ================= INIT ================= */
-
-window.onload = function () {
-    ChatEngine.init();
-};
+window.onload = ChatEngine.init;
 
 
-/* ================= BACKGROUND HEARTS ================= */
+/* ================= BACKGROUND LOVE ================= */
 
 setInterval(() => {
     const particle = document.createElement("div");
